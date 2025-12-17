@@ -1,0 +1,92 @@
+# Exemple complet corrigé
+#library(SeismicFEM)
+
+# 1. Créer un bâtiment simple (2D pour simplifier)
+building <- create_2D_frame(n_stories = 3, story_height = 3.5, n_bays = 2)
+
+# 2. Assembler les matrices
+K <- assemble_global_stiffness(building$elements,
+                               building$connectivity,
+                               building$total_dof)
+M <- assemble_global_mass(building$elements,
+                          building$connectivity,
+                          building$total_dof)
+
+# 3. Identifier les DOF contraints
+# Créer un vecteur logique des DOF contraints
+constrained <- logical(building$total_dof)
+n_nodes <- nrow(building$nodes)
+
+for(i in 1:n_nodes) {
+  if(building$nodes$constraint_x[i]) constrained[(i-1)*6 + 1] <- TRUE
+  if(building$nodes$constraint_y[i]) constrained[(i-1)*6 + 2] <- TRUE
+  if(building$nodes$constraint_z[i]) constrained[(i-1)*6 + 3] <- TRUE
+  if(building$nodes$constraint_rx[i]) constrained[(i-1)*6 + 4] <- TRUE
+  if(building$nodes$constraint_ry[i]) constrained[(i-1)*6 + 5] <- TRUE
+  if(building$nodes$constraint_rz[i]) constrained[(i-1)*6 + 6] <- TRUE
+}
+
+constrained_dof <- which(constrained)
+
+# 4. Appliquer les conditions aux limites
+K_constrained <- apply_boundary_conditions(K, constrained_dof)
+
+# 5. Analyse modale
+modal_results <- solve_modes(M, K_constrained, n_modes = 3)
+
+# Afficher les résultats
+cat("=== ANALYSE MODALE ===\n")
+cat("Nombre de modes calculés:", ncol(modal_results$modes), "\n")
+cat("Fréquences (Hz):", round(modal_results$frequencies, 3), "\n")
+cat("Périodes (s):", round(modal_results$periods, 3), "\n")
+cat("Ratios de masse modale:", round(modal_results$modal_mass_ratio, 3), "\n")
+cat("Ratio cumulé:", round(cumsum(modal_results$modal_mass_ratio), 3), "\n")
+
+# 6. Visualiser le premier mode
+if(require(plotly)) {
+  p <- plot_mode_shape(building$nodes, modal_results$modes,
+                       mode_number = 1, scale_factor = 5)
+  print(p)
+}
+
+# 7. Test avec une structure plus simple d'abord
+test_simple_structure <- function() {
+  # Structure très simple : 2 nœuds, 1 élément
+  nodes <- create_nodes(matrix(c(0,0,0, 5,0,0), ncol=3, byrow=TRUE))
+  nodes <- apply_bc(nodes, 1, list(
+    constraint_x=TRUE, constraint_y=TRUE, constraint_z=TRUE,
+    constraint_rx=TRUE, constraint_ry=TRUE, constraint_rz=TRUE
+  ))
+
+  elements <- list(
+    BeamElement(L=5, E=2.5e10, I=0.001, A=0.2, rho=2500)
+  )
+
+  connectivity <- matrix(c(1,2), ncol=2)
+  total_dof <- nrow(nodes) * 6
+
+  K <- assemble_global_stiffness(elements, connectivity, total_dof)
+  M <- assemble_global_mass(elements, connectivity, total_dof)
+
+  # Identifier DOF contraints
+  constrained <- logical(total_dof)
+  constrained[1:6] <- TRUE  # Premier nœud encastré
+
+  K_constrained <- apply_boundary_conditions(K, which(constrained))
+
+  # Analyse modale
+  modal <- solve_modes(M, K_constrained, n_modes=3)
+
+  cat("\n=== TEST STRUCTURE SIMPLE ===\n")
+  cat("Dimensions de modes:", dim(modal$modes), "\n")
+  cat("Fréquences:", modal$frequencies, "\n")
+
+  # Visualisation
+  p <- plot_mode_shape(nodes, modal$modes, mode_number=1, scale_factor=1)
+  print(p)
+
+  return(list(nodes=nodes, modal=modal))
+}
+
+# Exécuter le test
+# test_result <- test_simple_structure()

@@ -1,0 +1,15 @@
+Package: SeismicFEM
+Title: Seismic Analysis of Buildings Using Finite Element Method
+Version: 1.0.0
+Authors@R: person("NGALANI", "Amstrong", email = "tipiamstrong@gmail.com", role = c("aut", "cre"))
+Description: Perform seismic analysis of buildings using Finite Element Method (FEM).
+    Implements beam, column, and shear wall elements for structural analysis.
+License: GPL (>= 3)
+Depends: R (>= 3.5.0)
+Imports: Matrix, ggplot2, plotly, deSolve, pracma, Rcpp
+Suggests: testthat, knitr, rmarkdown
+VignetteBuilder: knitr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+version: 0.1.0

@@ -1,0 +1,27 @@
+{
+    "id": "39DC3BC3",
+    "path": "~/package/SeismicFEM/R/damping_matrices.R",
+    "project_path": "R/damping_matrices.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1765732126426.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "42,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1765732147,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1765732147521,
+    "read_only": false,
+    "read_only_alternatives": []
+}
